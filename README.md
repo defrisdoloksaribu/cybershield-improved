@@ -98,10 +98,11 @@ script.js → Mengatur fungsi dan interaksi pada website.
 CyberShield merupakan website berbasis HTML, CSS, dan JavaScript sehingga dapat dijalankan langsung melalui browser.
 
 1. Clone repository
-git clone https://github.com/defrisdoloksaribu/cybershield-improved.git
+**git clone https://github.com/defrisdoloksaribu/cybershield-improved.git**
 2. Masuk ke folder project
-cd cybershield-improved
+**cd cybershield-improved**
 3. Jalankan website
+**index.html**
 
 Buka file:
 
