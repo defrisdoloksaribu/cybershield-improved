@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CyberShield — Tools Keamanan Digital</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="cursor" id="cur"></div>
+<div class="cursor-trail" id="trail"></div>
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<nav id="navbar">
+  <a class="logo" href="index.html">Cyber<span>Shield</span></a>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="edukasi.html">Edukasi</a></li>
+    <li><a href="simulasi.html">Simulasi</a></li>
+    <li><a href="tips.html">Tips</a></li>
+    <li><a href="tools.html" class="active">Tools</a></li>
+    <li><a href="about.html">Tentang</a></li>
+  </ul>
+  <a class="nav-cta" href="simulasi.html">Mulai Simulasi</a>
+  <button class="hamburger" onclick="toggleMenu()">☰</button>
+</nav>
+<div class="mob-menu" id="mobMenu">
+  <a href="index.html">Home</a><a href="edukasi.html">Edukasi</a>
+  <a href="simulasi.html">Simulasi</a><a href="tips.html">Tips</a>
+  <a href="tools.html">Tools</a><a href="about.html">Tentang</a>
+</div>
+
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <span class="ticker-item">Phishing meningkat 340% di 2024</span>
+    <span class="ticker-item">Ransomware serang 1 organisasi tiap 11 detik</span>
+    <span class="ticker-item">71% pengguna internet pakai password yang sama</span>
+    <span class="ticker-item">95% insiden siber melibatkan human error</span>
+    <span class="ticker-item">Indonesia masuk 10 besar target serangan siber</span>
+    <span class="ticker-item">560.000 malware baru terdeteksi setiap harinya</span>
+    <span class="ticker-item">Phishing meningkat 340% di 2024</span>
+    <span class="ticker-item">Ransomware serang 1 organisasi tiap 11 detik</span>
+    <span class="ticker-item">71% pengguna internet pakai password yang sama</span>
+    <span class="ticker-item">95% insiden siber melibatkan human error</span>
+    <span class="ticker-item">Indonesia masuk 10 besar target serangan siber</span>
+    <span class="ticker-item">560.000 malware baru terdeteksi setiap harinya</span>
+  </div>
+</div>
+
+<div class="page-hero">
+  <div class="ph-inner">
+    <div class="ph-breadcrumb"><a href="index.html">Home</a><span>›</span><span>Tools</span></div>
+    <div class="ph-tag">🛠 Tools Keamanan Digital</div>
+    <h1 class="ph-title">Cek & <span class="ac">Lindungi</span> Dirimu</h1>
+    <p class="ph-desc">Dua tool gratis yang langsung bisa kamu gunakan sekarang — cek kekuatan password dan analisis keamanan URL/link yang kamu terima.</p>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- INTRO BANNER -->
+  <div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:44px;display:flex;align-items:center;gap:14px" class="reveal">
+    <div style="font-size:24px;flex-shrink:0">💡</div>
+    <p style="font-size:14px;color:var(--text2);line-height:1.65"><strong style="color:var(--text)">Cara Menggunakan:</strong> Tool ini membantu kamu menilai keamanan password dan kecurigaan sebuah URL secara mandiri. Cocok sebelum membuat akun baru atau sebelum mengklik link mencurigakan yang kamu terima.</p>
+  </div>
+
+  <div class="tools-grid">
+
+    <!-- PASSWORD CHECKER -->
+    <div class="tool-card reveal">
+      <div class="tool-icon">🔐</div>
+      <div class="tool-title">Cek Kekuatan Password</div>
+      <p class="tool-desc">Masukkan password yang ingin kamu evaluasi. Analisis dilakukan 100% di browser — tidak ada data yang dikirim ke server manapun.</p>
+      <div class="tool-input-wrap">
+        <input type="password" id="pwInput" class="tool-input" placeholder="Ketik password di sini..." oninput="checkPassword()" autocomplete="off">
+        <button class="btn-primary" onclick="document.getElementById('pwInput').type=document.getElementById('pwInput').type==='password'?'text':'password'" style="padding:11px 16px;flex-shrink:0">👁</button>
+      </div>
+      <div class="pw-bar-wrap"><div id="pwBar"></div></div>
+      <div id="pwResult"></div>
+      <div id="pwTips"></div>
+      <div style="margin-top:16px;padding:12px 14px;background:var(--bg2);border-radius:10px;font-size:12px;color:var(--muted)">
+        🔒 <strong>100% Privat</strong> — Password kamu tidak dikirim ke mana pun. Semua analisis terjadi di browser lokal.
+      </div>
+    </div>
+
+    <!-- URL CHECKER -->
+    <div class="tool-card reveal">
+      <div class="tool-icon">🔗</div>
+      <div class="tool-title">Analisis Keamanan URL / Link</div>
+      <p class="tool-desc">Paste URL atau link mencurigakan yang kamu terima. Tool ini akan mengidentifikasi tanda-tanda phishing dan domain berbahaya.</p>
+      <div class="tool-input-wrap">
+        <input type="text" id="urlInput" class="tool-input" placeholder="https://contoh-url.com atau bit.ly/xxx..." oninput="checkURL()" autocomplete="off">
+      </div>
+      <div id="urlResult"></div>
+      <div style="margin-top:16px;padding:12px 14px;background:var(--bg2);border-radius:10px;font-size:12px;color:var(--muted)">
+        ⚠️ <strong>Analisis Dasar</strong> — Tool ini mendeteksi tanda-tanda umum phishing. Untuk link penting, tetap verifikasi manual ke pihak resmi.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TIPS PENGGUNAAN -->
+  <div style="margin-top:52px" class="reveal">
+    <h3 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-.3px">Cara Membaca Hasil Analisis</h3>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:20px">Panduan singkat agar kamu bisa menginterpretasikan hasil dengan tepat</p>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+      <div style="background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:20px">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">🔐 Password Strength</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.9">
+          <div><span style="color:#dc2626;font-weight:600">Sangat Lemah / Lemah</span> — Ganti sekarang. Bisa ditebak dalam menit hingga jam.</div>
+          <div><span style="color:#ca8a04;font-weight:600">Sedang</span> — Aman untuk akun tidak penting, tapi kurang untuk email atau banking.</div>
+          <div><span style="color:#16a34a;font-weight:600">Kuat / Sangat Kuat</span> — Aman untuk digunakan pada akun penting.</div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:20px">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">🔗 URL Safety</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.9">
+          <div><span style="color:#dc2626;font-weight:600">Sangat Mencurigakan</span> — Jangan klik! Kemungkinan besar phishing.</div>
+          <div><span style="color:#ea580c;font-weight:600">Perlu Kewaspadaan</span> — Ada tanda bahaya. Verifikasi ke sumber resmi dulu.</div>
+          <div><span style="color:#16a34a;font-weight:600">Tampak Aman</span> — Tidak ada tanda bahaya umum yang terdeteksi.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  
+
+
+</div>
+  <!-- CTA -->
+  <div class="cta-box reveal" style="margin-top:52px">
+    <div class="cta-tag">// Sudah Paham?</div>
+    <h3 class="cta-title">Uji Kemampuanmu Lebih Jauh!</h3>
+    <p class="cta-desc">Tools sudah kamu kuasai — sekarang hadapi skenario ancaman siber nyata dalam simulasi interaktif kami.</p>
+    <div class="cta-btns">
+      <a class="btn-primary" href="simulasi.html">🎮 Mulai Simulasi →</a>
+      <a class="btn-secondary" href="edukasi.html">📚 Pelajari Ancaman</a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a class="footer-logo" href="index.html">Cyber<span>Shield</span></a>
+        <p class="footer-about">Platform edukasi keamanan siber interaktif untuk meningkatkan literasi digital masyarakat Indonesia.</p>
+        <div class="footer-badges">
+          <span class="footer-badge">🔒 Gratis</span><span class="footer-badge">🎮 Interaktif</span><span class="footer-badge">🏆 TechSoft 2026</span>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Navigasi</div>
+        <div class="footer-links">
+          <a href="index.html">Home</a><a href="edukasi.html">Edukasi</a>
+          <a href="simulasi.html">Simulasi</a><a href="tips.html">Tips</a>
+          <a href="tools.html">Tools</a><a href="about.html">Tentang</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Tools</div>
+        <div class="footer-links">
+          <a href="tools.html">Password Strength Checker</a>
+          <a href="tools.html">URL Safety Analyzer</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2026 CyberShield — Tim Hoga hoga</p>
+      <p class="footer-made">Tema: <span>INNOVATE</span> — Know the Threat. Be the Shield.</p>
+    </div>
+  </div>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>

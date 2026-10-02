@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CyberShield — Simulasi Interaktif</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #040d1a;
+  --bg2:      #060f20;
+  --bg3:      #08152a;
+  --surface:  #0d1f35;
+  --surf2:    #102440;
+  --surf3:    rgba(13,31,53,.85);
+  --cyan:     #00e5ff;
+  --cyan2:    #00b4d8;
+  --violet:   #a855f7;
+  --emerald:  #10b981;
+  --red:      #ef4444;
+  --orange:   #f97316;
+  --text:     #f0f8ff;
+  --text2:    #94b3cc;
+  --text3:    #5a7a94;
+  --muted:    #3a5570;
+  --border:   rgba(0,229,255,.12);
+  --borderHov:rgba(0,229,255,.3);
+  --shadow-s: 0 2px 16px rgba(0,0,0,.4);
+  --shadow-m: 0 8px 32px rgba(0,0,0,.5), 0 0 20px rgba(0,229,255,.05);
+  --shadow-l: 0 16px 48px rgba(0,0,0,.6), 0 0 40px rgba(0,229,255,.08);
+}
+*{ margin:0; padding:0; box-sizing:border-box }
+html{ scroll-behavior:smooth }
+
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Outfit',sans-serif;
+  font-size:15px; overflow-x:hidden; line-height:1.7;
+  cursor:none;
+}
+body::before {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 50% at 110% -10%, rgba(0,229,255,.06) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 40% at -10% 110%, rgba(168,85,247,.05) 0%, transparent 55%);
+  animation:bgDrift 25s ease-in-out infinite alternate;
+}
+body::after {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,229,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,.018) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 0%, black 0%, transparent 80%);
+}
+@keyframes bgDrift { 0%{transform:translate(0,0)} 100%{transform:translate(20px,-20px)} }
+
+nav, .ticker-wrap, .page-hero, .page-wrap, footer,
+.scroll-top, .cursor, .cursor-trail, .mob-menu,
+.modal-overlay { position:relative; z-index:1 }
+
+/* ── CURSOR ── */
+.cursor {
+  width:10px; height:10px; background:var(--cyan);
+  border-radius:50%; position:fixed; pointer-events:none; z-index:9999;
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 16px rgba(0,229,255,.7);
+  transition:width .15s, height .15s;
+}
+.cursor.hover {
+  width:32px; height:32px; background:transparent;
+  border:1.5px solid var(--cyan);
+  box-shadow:0 0 20px rgba(0,229,255,.4);
+}
+.cursor-trail {
+  width:26px; height:26px;
+  border:1px solid rgba(0,229,255,.18);
+  border-radius:50%; position:fixed; pointer-events:none; z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:left .1s ease, top .1s ease;
+}
+
+/* ── NAV ── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 40px;
+  background:rgba(4,13,26,.75);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid transparent; transition:all .3s;
+}
+nav.scrolled { padding:11px 40px; border-bottom-color:var(--border); box-shadow:0 4px 30px rgba(0,0,0,.5) }
+.logo { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:26px; color:var(--cyan); text-decoration:none; text-shadow:0 0 20px rgba(0,229,255,.4) }
+.logo span { color:var(--text) }
+nav ul { list-style:none; display:flex; gap:2px }
+nav ul a { font-family:'Outfit',sans-serif; color:var(--text2); text-decoration:none; font-size:14px; font-weight:500; padding:7px 14px; border-radius:8px; transition:all .2s; cursor:none }
+nav ul a:hover, nav ul a.active { color:var(--cyan); background:rgba(0,229,255,.07) }
+.nav-cta { font-family:'Outfit',sans-serif; font-size:13px; font-weight:700; padding:9px 22px; background:transparent; color:var(--cyan); border:1.5px solid var(--cyan); cursor:none; border-radius:8px; transition:all .25s; text-decoration:none; display:inline-block; box-shadow:0 0 16px rgba(0,229,255,.12) }
+.nav-cta:hover { background:rgba(0,229,255,.1); box-shadow:0 0 28px rgba(0,229,255,.3); transform:translateY(-1px) }
+.hamburger { display:none; background:transparent; border:1px solid var(--border); color:var(--text2); padding:7px 13px; cursor:none; font-size:18px; border-radius:8px; transition:all .2s }
+.hamburger:hover { border-color:var(--cyan); color:var(--cyan) }
+.mob-menu { display:none; position:fixed; top:60px; left:0; right:0; z-index:199; background:rgba(4,13,26,.97); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:14px 24px; flex-direction:column; gap:4px }
+.mob-menu.open { display:flex }
+.mob-menu a { font-family:'Outfit',sans-serif; color:var(--text2); text-decoration:none; font-size:14px; padding:10px 14px; border-radius:8px; cursor:none; transition:all .2s }
+.mob-menu a:hover { color:var(--cyan); background:rgba(0,229,255,.07) }
+
+/* ── TICKER ── */
+.ticker-wrap { background:linear-gradient(90deg,rgba(0,229,255,.12),rgba(168,85,247,.1),rgba(0,229,255,.12)); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:9px 0; overflow:hidden; margin-top:67px; position:relative }
+.ticker-wrap::before { content:''; position:absolute; left:0; top:0; bottom:0; width:80px; background:linear-gradient(90deg,var(--bg),transparent); z-index:2 }
+.ticker-wrap::after { content:''; position:absolute; right:0; top:0; bottom:0; width:80px; background:linear-gradient(-90deg,var(--bg),transparent); z-index:2 }
+.ticker-inner { display:flex; gap:64px; animation:ticker 40s linear infinite; white-space:nowrap }
+.ticker-item { font-family:'Space Mono',monospace; font-size:11px; color:rgba(0,229,255,.8); letter-spacing:.5px; flex-shrink:0 }
+.ticker-item::before { content:'◆ '; color:rgba(0,229,255,.4) }
+@keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+/* ── SCROLL TOP ── */
+.scroll-top { position:fixed; bottom:28px; right:28px; z-index:500; width:42px; height:42px; background:transparent; color:var(--cyan); border:1.5px solid var(--cyan); font-size:16px; cursor:none; border-radius:10px; transition:all .3s; opacity:0; pointer-events:none; box-shadow:0 0 16px rgba(0,229,255,.15) }
+.scroll-top.show { opacity:1; pointer-events:auto }
+.scroll-top:hover { background:rgba(0,229,255,.1); transform:translateY(-3px) }
+
+/* ── BUTTONS ── */
+.btn-primary { font-family:'Outfit',sans-serif; font-size:13px; font-weight:700; padding:13px 28px; background:linear-gradient(135deg,var(--cyan),var(--cyan2)); color:#040d1a; border:none; cursor:none; border-radius:8px; transition:all .25s; text-decoration:none; display:inline-block; box-shadow:0 0 24px rgba(0,229,255,.3) }
+.btn-primary:hover { box-shadow:0 0 40px rgba(0,229,255,.5); transform:translateY(-2px); filter:brightness(1.1) }
+.btn-secondary { font-family:'Outfit',sans-serif; font-size:13px; font-weight:600; padding:13px 28px; background:transparent; color:var(--text2); border:1.5px solid rgba(255,255,255,.12); cursor:none; border-radius:8px; transition:all .25s; text-decoration:none; display:inline-block }
+.btn-secondary:hover { background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.22); color:var(--text); transform:translateY(-2px) }
+.btn-outline { font-family:'Outfit',sans-serif; font-size:13px; font-weight:600; padding:11px 24px; background:transparent; color:var(--text3); border:1px solid var(--border); cursor:none; border-radius:8px; transition:all .25s; text-decoration:none; display:inline-block }
+.btn-outline:hover { border-color:var(--borderHov); color:var(--cyan) }
+
+/* ── PAGE HERO ── */
+/* DIPERBAIKI: max-width dibesarkan, padding lebih lega */
+.page-hero {
+  padding:80px 60px 52px;
+  max-width:1400px;
+  margin:0 auto;
+}
+.ph-inner { max-width:1500px }
+.ph-breadcrumb { font-family:'Space Mono',monospace; font-size:11px; color:var(--text3); margin-bottom:20px; display:flex; align-items:center; gap:8px }
+.ph-breadcrumb a { color:var(--text3); text-decoration:none; transition:color .2s }
+.ph-breadcrumb a:hover { color:var(--cyan) }
+.ph-breadcrumb span { color:var(--muted) }
+.ph-tag { display:inline-flex; align-items:center; gap:6px; background:rgba(0,229,255,.07); color:var(--cyan); font-family:'Space Mono',monospace; font-size:10px; padding:5px 14px; border-radius:20px; margin-bottom:18px; letter-spacing:1.5px; border:1px solid rgba(0,229,255,.15) }
+.ph-title { font-family:'Space Grotesk',sans-serif; font-size:clamp(28px,4vw,46px); font-weight:800; color:var(--text); letter-spacing:-1.5px; margin-bottom:14px; line-height:1.1 }
+.ph-title .ac { background:linear-gradient(135deg,var(--cyan),var(--violet)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text }
+.ph-desc { font-size:15px; color:var(--text2); line-height:1.8; max-width:680px }
+
+/* ── PAGE WRAP ── */
+/* DIPERBAIKI: max-width dibesarkan dari 900px ke 1200px, padding horizontal lebih lega */
+.page-wrap {
+  max-width:1400px;
+  margin:0 auto;
+  padding:0 60px 80px;
+}
+
+/* ═══════════════════════════════════
+   SIM-BOX — DARK TERMINAL
+═══════════════════════════════════ */
+.sim-box {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:var(--shadow-l);
+  position:relative;
+}
+.sim-box.hacked { animation:hackShake .5s ease }
+@keyframes hackShake {
+  0%,100%{transform:translateX(0)} 15%{transform:translateX(-8px)} 30%{transform:translateX(8px)} 45%{transform:translateX(-5px)} 60%{transform:translateX(5px)} 75%{transform:translateX(-3px)} 90%{transform:translateX(3px)}
+}
+
+/* Top bar */
+.sim-topbar {
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  padding:11px 18px;
+  display:flex; align-items:center; gap:10px;
+}
+.sim-dots { display:flex; gap:6px }
+.sim-dot { width:11px; height:11px; border-radius:50% }
+.sim-dot.r{background:#ef4444} .sim-dot.y{background:#f59e0b} .sim-dot.g{background:#22c55e;box-shadow:0 0 5px rgba(34,197,94,.5)}
+.sim-title-bar { font-family:'Space Mono',monospace; font-size:11px; color:var(--text3); flex:1; text-align:center; letter-spacing:.5px }
+.sim-timer { font-family:'Space Mono',monospace; font-size:11px; color:var(--cyan); background:rgba(0,229,255,.08); border:1px solid rgba(0,229,255,.2); padding:4px 12px; border-radius:8px }
+.blink { animation:blink 1s steps(1) infinite }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── START SCREEN ── */
+/* DIPERBAIKI: padding lebih lega, max-width konten dalam diperbesar */
+.sim-start { padding:60px 60px; text-align:center }
+.ss-icon { font-size:64px; margin-bottom:20px; display:block; filter:drop-shadow(0 0 20px rgba(0,229,255,.4)) }
+.ss-title { font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700; color:var(--text); letter-spacing:-.5px; margin-bottom:12px }
+.ss-desc { font-size:14px; color:var(--text2); line-height:1.7; margin-bottom:28px; max-width:600px; margin-left:auto; margin-right:auto }
+.ss-features { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px; max-width:800px; margin-left:auto; margin-right:auto }
+.ss-feat { background:rgba(0,229,255,.05); border:1px solid rgba(0,229,255,.12); border-radius:10px; padding:16px 10px; font-size:12px; color:var(--text2); text-align:center; transition:all .2s }
+.ss-feat:hover { border-color:rgba(0,229,255,.25); background:rgba(0,229,255,.08) }
+.ss-feat span { display:block; color:var(--cyan); font-weight:700; font-size:12px; margin-top:4px }
+
+/* Category pills */
+.ss-categories { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:28px }
+.ss-cat { font-family:'Space Mono',monospace; font-size:10px; padding:4px 14px; border-radius:20px; letter-spacing:.5px; border:1px solid; }
+.ss-cat.ph { color:#f87171; border-color:rgba(239,68,68,.3); background:rgba(239,68,68,.06) }
+.ss-cat.ml { color:#fb923c; border-color:rgba(249,115,22,.3); background:rgba(249,115,22,.06) }
+.ss-cat.rw { color:#c084fc; border-color:rgba(168,85,247,.3); background:rgba(168,85,247,.06) }
+.ss-cat.se { color:#34d399; border-color:rgba(52,211,153,.3); background:rgba(52,211,153,.06) }
+.ss-cat.pw { color:var(--cyan); border-color:rgba(0,229,255,.3); background:rgba(0,229,255,.06) }
+.ss-cat.mm { color:#a3e635; border-color:rgba(163,230,53,.3); background:rgba(163,230,53,.06) }
+
+.ss-tip-box { margin-bottom:28px; padding:18px 24px; background:rgba(0,229,255,.04); border:1.5px solid rgba(0,229,255,.12); border-radius:12px; max-width:560px; margin-left:auto; margin-right:auto }
+.ss-tip-label { font-family:'Space Mono',monospace; font-size:10px; color:var(--cyan); letter-spacing:1.5px; margin-bottom:8px; text-transform:uppercase }
+.ss-tip-text { font-size:13px; color:var(--text2); line-height:1.65 }
+
+/* ── PAUSE OVERLAY ── */
+.pause-overlay {
+  display:none; position:absolute; inset:0; z-index:50;
+  background:rgba(4,13,26,.9); backdrop-filter:blur(8px);
+  align-items:center; justify-content:center;
+  border-radius:18px;
+}
+.pause-overlay.show { display:flex }
+.pause-box { text-align:center; padding:48px 40px }
+.pause-icon { font-size:56px; margin-bottom:16px; display:block }
+.pause-title { font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:700; color:var(--text); margin-bottom:8px }
+.pause-sub { font-size:14px; color:var(--text2); margin-bottom:32px }
+.pause-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap }
+
+/* ── QUIZ AREA ── */
+/* DIPERBAIKI: padding lebih lega */
+.sim-body { padding:36px 48px }
+.q-header { display:flex; align-items:center; gap:12px; margin-bottom:20px }
+.q-num { font-family:'Space Mono',monospace; font-size:11px; color:var(--text3); letter-spacing:1.5px; white-space:nowrap }
+.q-progress { flex:1; height:4px; background:rgba(255,255,255,.06); border-radius:4px; overflow:hidden }
+.q-bar { height:100%; border-radius:4px; transition:width .5s ease; background:linear-gradient(90deg,var(--cyan),var(--violet)) }
+.q-controls { display:flex; gap:8px; flex-shrink:0 }
+.q-btn-pause, .q-btn-exit {
+  font-family:'Space Mono',monospace; font-size:10px; padding:5px 12px;
+  border-radius:7px; cursor:none; transition:all .2s; border:1px solid;
+}
+.q-btn-pause { color:var(--cyan); border-color:rgba(0,229,255,.2); background:rgba(0,229,255,.06) }
+.q-btn-pause:hover { background:rgba(0,229,255,.14); border-color:var(--cyan) }
+.q-btn-exit { color:var(--text3); border-color:rgba(255,255,255,.1); background:transparent }
+.q-btn-exit:hover { color:#f87171; border-color:rgba(239,68,68,.3); background:rgba(239,68,68,.06) }
+
+.q-type { display:inline-block; font-family:'Space Mono',monospace; font-size:10px; padding:3px 12px; border-radius:20px; border:1px solid; margin-bottom:12px; letter-spacing:1px }
+.q-type.t-phishing   { color:#f87171; border-color:rgba(239,68,68,.3); background:rgba(239,68,68,.06) }
+.q-type.t-malware    { color:#fb923c; border-color:rgba(249,115,22,.3); background:rgba(249,115,22,.06) }
+.q-type.t-ransomware { color:#c084fc; border-color:rgba(168,85,247,.3); background:rgba(168,85,247,.06) }
+.q-type.t-social     { color:#34d399; border-color:rgba(52,211,153,.3); background:rgba(52,211,153,.06) }
+.q-type.t-password   { color:var(--cyan); border-color:rgba(0,229,255,.3); background:rgba(0,229,255,.06) }
+.q-type.t-mitm       { color:#a3e635; border-color:rgba(163,230,53,.3); background:rgba(163,230,53,.06) }
+
+.q-body { font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; color:var(--text); line-height:1.5; margin-bottom:16px }
+
+#qVisual { margin-bottom:18px }
+
+/* Terminal mockup */
+.term-mock { background:#000d1a; border:1px solid rgba(0,229,255,.15); border-radius:12px; overflow:hidden; font-family:'Space Mono',monospace }
+.term-bar { background:#071525; padding:10px 14px; display:flex; align-items:center; gap:7px; border-bottom:1px solid rgba(0,229,255,.08) }
+.td { width:10px; height:10px; border-radius:50% }
+.td.r{background:#ef4444} .td.y{background:#f59e0b} .td.g{background:#22c55e}
+.term-body { padding:16px 18px; display:flex; flex-direction:column; gap:5px }
+.tl { font-size:12px; line-height:1.7 }
+.tl-err  { color:#f87171 }
+.tl-warn { color:#fb923c }
+.tl-info { color:var(--cyan) }
+.tl { color:var(--text2) }
+
+/* Email mockup */
+.email-mock-v2 { background:#070f1c; border:1px solid rgba(0,229,255,.12); border-radius:12px; overflow:hidden; font-family:'Outfit',sans-serif }
+.emv2-chrome { background:#0d1929; padding:10px 14px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(0,229,255,.08) }
+.emv2-dots span { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:5px }
+.emv2-dots span:nth-child(1){background:#ef4444} .emv2-dots span:nth-child(2){background:#f59e0b} .emv2-dots span:nth-child(3){background:#22c55e}
+.emv2-title { font-family:'Space Mono',monospace; font-size:11px; color:var(--text3); flex:1; text-align:center }
+.emv2-inbox-bar { background:#0a1625; padding:8px 14px; border-bottom:1px solid rgba(255,255,255,.04) }
+.emv2-inbox-label { font-family:'Space Mono',monospace; font-size:10px; color:var(--text3); letter-spacing:.5px }
+.emv2-email-row { padding:16px; display:flex; gap:12px; transition:background .2s }
+.emv2-email-row.emv2-phishing { background:rgba(239,68,68,.04); border-left:2px solid rgba(239,68,68,.35) }
+.emv2-avatar { width:38px; height:38px; border-radius:50%; background:rgba(0,229,255,.1); border:1px solid rgba(0,229,255,.15); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--cyan); font-size:14px; flex-shrink:0 }
+.emv2-email-top { display:flex; align-items:center; gap:8px; margin-bottom:3px; flex-wrap:wrap }
+.emv2-sender { font-size:13px; font-weight:600; color:var(--text) }
+.emv2-addr { font-family:'Space Mono',monospace; font-size:10px; color:var(--text3) }
+.emv2-flag-badge { font-family:'Space Mono',monospace; font-size:9px; padding:2px 8px; background:rgba(239,68,68,.1); color:#f87171; border:1px solid rgba(239,68,68,.2); border-radius:6px }
+.emv2-subject { font-size:13px; font-weight:600; color:var(--text2); margin-bottom:6px }
+.emv2-body { font-size:12px; color:var(--text3); line-height:1.65 }
+.emv2-link-row { margin-top:8px; display:flex; align-items:center; gap:6px; flex-wrap:wrap }
+.emv2-link-icon { font-size:12px }
+.emv2-url { font-family:'Space Mono',monospace; font-size:11px; color:var(--cyan) }
+.emv2-url.emv2-url-bad { color:#f87171; text-decoration:line-through }
+.emv2-url-warn { font-family:'Space Mono',monospace; font-size:10px; color:#f87171 }
+.emv2-redflag-box { margin:0 14px 14px; padding:10px 14px; background:rgba(239,68,68,.06); border:1px solid rgba(239,68,68,.2); border-radius:8px }
+.emv2-rf-title { font-family:'Space Mono',monospace; font-size:10px; color:#f87171; letter-spacing:.5px; margin-bottom:6px }
+.emv2-rf-item { font-size:11px; color:#fca5a5; padding:2px 0 }
+
+/* Browser mockup */
+.browser-mock { background:#060f1c; border:1px solid rgba(0,229,255,.12); border-radius:12px; overflow:hidden }
+.bm-chrome { background:#0d1929; padding:10px 14px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(0,229,255,.08) }
+.bm-dots span { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:5px }
+.bm-dots span.r{background:#ef4444} .bm-dots span.y{background:#f59e0b} .bm-dots span.g{background:#22c55e}
+.bm-url-bar { flex:1; background:#040d1a; border:1px solid rgba(0,229,255,.1); border-radius:6px; padding:5px 10px; display:flex; align-items:center; gap:6px }
+.bm-lock { font-size:11px }
+.bm-lock-secure { color:#34d399 }
+.bm-lock-bad { color:#f87171 }
+.bm-domain { font-family:'Space Mono',monospace; font-size:10px; color:var(--text2) }
+.bm-domain.bm-domain-bad { color:#f87171 }
+.bm-not-secure { font-family:'Space Mono',monospace; font-size:9px; color:#f87171 }
+.bm-body { padding:16px }
+.bm-page-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:12px }
+.bm-warning-bar { margin-top:10px; padding:8px 12px; background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2); border-radius:8px; font-size:11px; color:#fca5a5 }
+
+/* WA mockup */
+.wa-mock-v2 { background:#060f1c; border:1px solid rgba(0,229,255,.12); border-radius:12px; overflow:hidden }
+.wam-chrome { background:#0d1929; padding:10px 14px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(0,229,255,.08) }
+.wam-dots span { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:5px }
+.wam-dots span:nth-child(1){background:#ef4444} .wam-dots span:nth-child(2){background:#f59e0b} .wam-dots span:nth-child(3){background:#22c55e}
+.wam-title { font-family:'Space Mono',monospace; font-size:11px; color:var(--text3); flex:1; text-align:center }
+.wam-header { padding:12px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,.04) }
+.wam-avatar { font-size:24px }
+.wam-name { font-size:13px; font-weight:600; color:var(--text) }
+.wam-verified { font-family:'Space Mono',monospace; font-size:9px; color:#34d399; border:1px solid rgba(52,211,153,.3); background:rgba(52,211,153,.06); padding:2px 6px; border-radius:4px }
+.wam-unknown  { font-family:'Space Mono',monospace; font-size:9px; color:#fb923c; border:1px solid rgba(249,115,22,.3); background:rgba(249,115,22,.06); padding:2px 6px; border-radius:4px }
+.wam-status { font-size:11px; color:var(--text3) }
+.wam-chat-area { padding:14px 16px }
+.wam-bubble { background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.08); border-radius:12px; padding:12px 14px; font-size:12px; color:var(--text2); line-height:1.65; position:relative }
+.wam-time { font-family:'Space Mono',monospace; font-size:9px; color:var(--text3); float:right; margin-top:4px }
+.wam-warning { margin:0 14px 14px; padding:8px 12px; background:rgba(249,115,22,.08); border:1px solid rgba(249,115,22,.2); border-radius:8px; font-size:11px; color:#fdba74 }
+
+/* Choices */
+.choices { display:flex; flex-direction:column; gap:8px; margin-bottom:16px }
+.choice-btn {
+  display:flex; align-items:center; gap:12px; padding:13px 16px;
+  background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.08);
+  color:var(--text2); font-family:'Outfit',sans-serif; font-size:14px; font-weight:500;
+  text-align:left; cursor:none; transition:all .2s; width:100%; border-radius:10px;
+}
+.choice-btn:hover:not(:disabled) { border-color:rgba(0,229,255,.25); background:rgba(0,229,255,.06); color:var(--text); transform:translateX(4px) }
+.choice-btn.correct { background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.3); color:#34d399 }
+.choice-btn.wrong   { background:rgba(239,68,68,.08); border-color:rgba(239,68,68,.3);  color:#f87171 }
+.choice-letter { font-family:'Space Mono',monospace; font-size:11px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; background:rgba(0,229,255,.06); border:1px solid rgba(0,229,255,.15); border-radius:7px; flex-shrink:0; font-weight:700; color:var(--cyan); transition:all .2s }
+.choice-btn:hover:not(:disabled) .choice-letter { background:var(--cyan); color:#040d1a; border-color:var(--cyan) }
+
+/* Feedback */
+.feedback { display:none; padding:14px 16px; margin-bottom:16px; font-size:13px; line-height:1.65; border-radius:10px }
+.feedback.show { display:block; animation:fadeUp .3s ease }
+.feedback.ok  { background:rgba(16,185,129,.07); border:1px solid rgba(16,185,129,.25); color:#34d399 }
+.feedback.bad { background:rgba(239,68,68,.07);  border:1px solid rgba(239,68,68,.25);  color:#fca5a5 }
+.fb-title { font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700; margin-bottom:5px }
+.fb-desc-text { color:var(--text2); font-size:13px; line-height:1.65 }
+
+/* Sim foot */
+.sim-foot { display:flex; justify-content:space-between; align-items:center; padding-top:14px; border-top:1px solid rgba(255,255,255,.06) }
+.score-disp { font-family:'Space Mono',monospace; font-size:11px; color:var(--text3) }
+.score-disp span { color:var(--cyan); font-weight:700 }
+
+/* ── RESULT ── */
+.result-screen { display:none; text-align:center; padding:52px 60px }
+.result-screen.show { display:block; animation:fadeIn .4s ease }
+.result-icon { font-size:64px; margin-bottom:14px; display:block; animation:bounceIn .5s ease; filter:drop-shadow(0 0 20px rgba(0,229,255,.3)) }
+.result-title { font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700; color:var(--text); margin-bottom:10px }
+.result-score { font-family:'Space Grotesk',sans-serif; font-size:64px; font-weight:800; line-height:1; margin-bottom:4px; background:linear-gradient(135deg,var(--cyan),var(--violet)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text }
+.result-pct { font-size:18px; font-weight:600; color:var(--text2); margin-bottom:6px }
+.result-time { font-family:'Space Mono',monospace; font-size:12px; color:var(--text3); margin-bottom:14px }
+.result-desc { font-size:14px; color:var(--text2); max-width:480px; margin:0 auto 24px; line-height:1.7 }
+.result-bd { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:24px }
+.result-btns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap }
+#certBox { margin:20px 0; display:none }
+
+/* ── INFO CARDS ── */
+.info-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:26px; transition:all .3s }
+.info-card:hover { border-color:rgba(0,229,255,.2); box-shadow:var(--shadow-m); transform:translateY(-4px) }
+.info-icon { font-size:28px; margin-bottom:12px; filter:drop-shadow(0 0 8px rgba(0,229,255,.3)) }
+.info-title { font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:700; color:var(--text); margin-bottom:8px }
+.info-desc { font-size:13px; color:var(--text2); line-height:1.65 }
+
+/* ── LEADERBOARD ── */
+.lb-section { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:32px; overflow:hidden }
+.lb-box { display:flex; flex-direction:column; gap:8px }
+.lb-row { display:flex; align-items:center; gap:14px; padding:12px 16px; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06); border-radius:10px; transition:all .2s }
+.lb-row:hover { border-color:rgba(0,229,255,.15) }
+.lb-top { border-color:rgba(0,229,255,.2); background:rgba(0,229,255,.04) }
+.lb-rank { font-family:'Space Mono',monospace; font-size:14px; width:28px; text-align:center; flex-shrink:0 }
+.lb-info { flex:1 }
+.lb-name { font-size:13px; font-weight:600; color:var(--text) }
+.lb-meta { font-family:'Space Mono',monospace; font-size:10px; color:var(--text3) }
+.lb-badge { font-size:12px; color:var(--text2) }
+.lb-score { font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; min-width:48px; text-align:right }
+
+/* ── SEC TAGS ── */
+.sec-tag { display:inline-flex; align-items:center; gap:6px; background:rgba(0,229,255,.07); color:var(--cyan); font-family:'Space Mono',monospace; font-size:10px; padding:5px 14px; border-radius:20px; margin-bottom:10px; letter-spacing:1.5px; border:1px solid rgba(0,229,255,.15) }
+
+/* ── FOOTER ── */
+footer { background:var(--bg2); border-top:1px solid var(--border); padding:52px 0 0 }
+.footer-inner { max-width:1400px; margin:0 auto; padding:0 60px }
+.footer-top { display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:60px; padding-bottom:40px }
+.footer-logo { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:22px; color:var(--cyan); text-decoration:none; display:block; margin-bottom:12px; text-shadow:0 0 16px rgba(0,229,255,.3) }
+.footer-logo span { color:var(--text) }
+.footer-about { font-size:13px; color:var(--text3); line-height:1.7; margin-bottom:18px }
+.footer-badges { display:flex; gap:7px; flex-wrap:wrap }
+.footer-badge { font-family:'Space Mono',monospace; font-size:10px; padding:4px 11px; border-radius:6px; background:rgba(0,229,255,.06); color:var(--cyan); border:1px solid rgba(0,229,255,.15) }
+.footer-col-title { font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--text); margin-bottom:16px }
+.footer-links { display:flex; flex-direction:column; gap:8px }
+.footer-links a { font-size:13px; color:var(--text3); text-decoration:none; transition:color .2s; cursor:none }
+.footer-links a:hover { color:var(--cyan) }
+.footer-bottom { border-top:1px solid var(--border); padding:18px 0; display:flex; justify-content:space-between; align-items:center }
+.footer-copy, .footer-made { font-size:12px; color:var(--text3) }
+.footer-made span { color:var(--cyan) }
+
+/* ── REVEAL ── */
+.reveal { opacity:0; transform:translateY(24px); transition:opacity .6s ease, transform .6s ease }
+.reveal.visible { opacity:1; transform:translateY(0) }
+
+@keyframes fadeUp { 0%{opacity:0;transform:translateY(20px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { 0%{opacity:0} 100%{opacity:1} }
+@keyframes bounceIn { 0%{transform:scale(.5)} 70%{transform:scale(1.1)} 100%{transform:scale(1)} }
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  .page-wrap { padding:0 40px 80px }
+  .page-hero { padding:70px 40px 44px }
+  .sim-body { padding:28px 36px }
+  .sim-start { padding:48px 40px }
+}
+@media(max-width:768px){
+  nav ul,.nav-cta{display:none} .hamburger{display:block}
+  .page-hero{padding:60px 24px 36px} .ph-title{font-size:30px}
+  .page-wrap{padding:0 20px 60px}
+  .sim-start{padding:36px 20px}
+  .ss-features{grid-template-columns:1fr 1fr}
+  .sim-body{padding:20px 18px}
+  .footer-inner{padding:0 24px}
+  .footer-top{grid-template-columns:1fr}
+  .result-screen{padding:40px 24px}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cur"></div>
+<div class="cursor-trail" id="trail"></div>
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<nav id="navbar">
+  <a class="logo" href="index.html">Cyber<span>Shield</span></a>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="edukasi.html">Edukasi</a></li>
+    <li><a href="simulasi.html" class="active">Simulasi</a></li>
+    <li><a href="tips.html">Tips</a></li>
+    <li><a href="tools.html">Tools</a></li>
+    <li><a href="about.html">Tentang</a></li>
+  </ul>
+  <a class="nav-cta" href="simulasi.html">Mulai Simulasi</a>
+  <button class="hamburger" onclick="toggleMenu()">☰</button>
+</nav>
+<div class="mob-menu" id="mobMenu">
+  <a href="index.html">Home</a>
+  <a href="edukasi.html">Edukasi</a>
+  <a href="simulasi.html">Simulasi</a>
+  <a href="tips.html">Tips</a>
+  <a href="tools.html">Tools</a>
+  <a href="about.html">Tentang</a>
+</div>
+
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <span class="ticker-item">Phishing meningkat 340% di 2024</span>
+    <span class="ticker-item">Ransomware serang 1 organisasi tiap 11 detik</span>
+    <span class="ticker-item">71% pengguna internet pakai password yang sama</span>
+    <span class="ticker-item">95% insiden siber melibatkan human error</span>
+    <span class="ticker-item">Indonesia masuk 10 besar target serangan siber</span>
+    <span class="ticker-item">560.000 malware baru terdeteksi setiap harinya</span>
+    <span class="ticker-item">Phishing meningkat 340% di 2024</span>
+    <span class="ticker-item">Ransomware serang 1 organisasi tiap 11 detik</span>
+    <span class="ticker-item">71% pengguna internet pakai password yang sama</span>
+    <span class="ticker-item">95% insiden siber melibatkan human error</span>
+    <span class="ticker-item">Indonesia masuk 10 besar target serangan siber</span>
+    <span class="ticker-item">560.000 malware baru terdeteksi setiap harinya</span>
+  </div>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="ph-inner">
+    <div class="ph-breadcrumb">
+      <a href="index.html">Home</a><span>›</span><span>Simulasi</span>
+    </div>
+    <div class="ph-tag">🎮 Simulasi Ancaman Siber Interaktif</div>
+    <h1 class="ph-title">Kenali <span class="ac">Ancamannya</span> Sebelum Terlambat</h1>
+    <p class="ph-desc">Hadapi skenario ancaman siber nyata — dari phishing email palsu, malware, ransomware, hingga social engineering. Setiap sesi soal selalu berbeda dan diacak otomatis!</p>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- QUIZ BOX -->
+  <div class="sim-box reveal" id="simBox">
+
+    <!-- Top Bar -->
+    <div class="sim-topbar">
+      <div class="sim-dots">
+        <div class="sim-dot r"></div>
+        <div class="sim-dot y"></div>
+        <div class="sim-dot g"></div>
+      </div>
+      <div class="sim-title-bar">CyberShield Threat Simulator v3.0 <span class="blink">_</span></div>
+      <div class="sim-timer" id="simTimer">⏱ 00:00</div>
+    </div>
+
+    <!-- PAUSE OVERLAY -->
+    <div class="pause-overlay" id="pauseOverlay">
+      <div class="pause-box">
+        <span class="pause-icon">⏸</span>
+        <div class="pause-title">Simulasi Dijeda</div>
+        <div class="pause-sub">Timer dihentikan. Lanjutkan kapanpun kamu siap.</div>
+        <div class="pause-btns">
+          <button class="btn-primary" onclick="resumeQuiz()">▶ Lanjutkan</button>
+          <button class="btn-secondary" onclick="exitToStart()">⏏ Keluar ke Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── START SCREEN ── -->
+    <div class="sim-start" id="startScreen">
+      <span class="ss-icon">🛡️</span>
+      <h2 class="ss-title">Simulasi Ancaman Siber</h2>
+      <p class="ss-desc">Kamu akan menghadapi <strong>7 skenario ancaman siber</strong> yang diacak dari pool 18+ soal. Setiap sesi akan selalu berbeda!</p>
+
+      <div class="ss-categories">
+        <span class="ss-cat ph">🎣 Phishing</span>
+        <span class="ss-cat ml">🦠 Malware</span>
+        <span class="ss-cat rw">🔒 Ransomware</span>
+        <span class="ss-cat se">🎭 Social Engineering</span>
+        <span class="ss-cat pw">🔑 Password & Akun</span>
+        <span class="ss-cat mm">👁 Man-in-the-Middle</span>
+      </div>
+
+
+      <div class="ss-tip-box">
+        <div class="ss-tip-label">💡 Tips Sebelum Mulai</div>
+        <div class="ss-tip-text">Baca setiap skenario dengan teliti sebelum memilih. Tidak ada batas waktu per soal — yang penting keputusannya tepat! Kamu bisa jeda kapanpun.</div>
+      </div>
+
+      <button class="btn-primary" style="font-size:16px;padding:15px 44px" onclick="beginQuiz()">🚀 Mulai Simulasi</button>
+      <div style="margin-top:14px">
+        <a href="edukasi.html" class="btn-outline">Pelajari Materi Dulu</a>
+      </div>
+    </div>
+
+    <!-- ── QUIZ AREA ── -->
+    <div class="sim-body" id="quizArea" style="display:none">
+      <div class="q-header">
+        <div class="q-num" id="qNum">Skenario 1 dari 7</div>
+        <div class="q-progress"><div class="q-bar" id="qBar" style="width:14%"></div></div>
+        <div class="q-controls">
+          <button class="q-btn-pause" onclick="pauseQuiz()">⏸ Jeda</button>
+          <button class="q-btn-exit" onclick="confirmExit()">✕ Keluar</button>
+        </div>
+      </div>
+      <div class="q-type" id="qType">Phishing</div>
+      <div class="q-body" id="qBody"></div>
+      <div id="qVisual" style="display:none"></div>
+      <div class="choices" id="choicesBox"></div>
+      <div class="feedback" id="feedbackBox">
+        <div class="fb-title" id="fbTitle"></div>
+        <div class="fb-desc-text" id="fbDesc"></div>
+      </div>
+      <div class="sim-foot">
+        <div class="score-disp">Skor: <span id="scoreVal">0</span> / <span id="totalVal">7</span></div>
+        <button class="btn-primary" id="nextBtn" style="display:none" onclick="nextQ()">Berikutnya →</button>
+      </div>
+    </div>
+
+    <!-- ── RESULT ── -->
+    <div class="result-screen" id="resultScreen">
+      <div class="result-icon" id="rIcon"></div>
+      <div class="result-title" id="rTitle"></div>
+      <div class="result-score" id="rScore"></div>
+      <div class="result-pct" id="rPct"></div>
+      <div class="result-time" id="rTime"></div>
+      <div class="result-desc" id="rDesc"></div>
+      <div class="result-bd" id="rBreakdown"></div>
+      <div id="certBox" style="display:none;margin-bottom:24px"></div>
+      <div class="result-btns">
+        <button class="btn-primary" onclick="restartQuiz()">🔄 Coba Lagi (Soal Baru!)</button>
+        <a class="btn-secondary" href="edukasi.html">📚 Baca Materi</a>
+        <a class="btn-secondary" href="tips.html">💡 Tips Keamanan</a>
+      </div>
+    </div>
+
+  </div><!-- /sim-box -->
+
+  <!-- INFO CARDS -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px">
+    <div class="info-card reveal">
+      <div class="info-icon">🖥️</div>
+      <div class="info-title">Visual Ancaman Nyata</div>
+      <p class="info-desc">Lihat tampilan email phishing, terminal malware, dan pesan social engineering — persis seperti yang bisa kamu temui.</p>
+    </div>
+    <div class="info-card reveal">
+      <div class="info-icon">🔬</div>
+      <div class="info-title">Penjelasan Teknis Detail</div>
+      <p class="info-desc">Setiap soal diikuti penjelasan mendalam: cara kerja serangannya dan kenapa bisa berbahaya bagi siapa saja.</p>
+    </div>
+    <div class="info-card reveal">
+      <div class="info-icon">📊</div>
+      <div class="info-title">Hasil per Kategori</div>
+      <p class="info-desc">Lihat breakdown hasil per jenis ancaman — mana yang sudah dikuasai dan mana yang perlu dipelajari lebih lanjut.</p>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="lb-section reveal" style="margin-top:48px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div class="sec-tag" style="display:inline-flex;margin-bottom:8px">🏆 Leaderboard</div>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:800;color:var(--text);margin:0;letter-spacing:-.3px">Skor Terbaik di Perangkat Ini</h3>
+        <p style="font-size:12px;color:var(--text3);margin-top:4px;font-family:'Space Mono',monospace">Tersimpan lokal · selesaikan simulasi untuk masuk</p>
+      </div>
+      <button onclick="clearLB()" style="font-size:11px;color:var(--text3);background:none;border:1px solid var(--border);padding:8px 14px;border-radius:8px;cursor:pointer;font-family:'Space Mono',monospace;transition:all .2s" onmouseover="this.style.color='#f87171';this.style.borderColor='rgba(239,68,68,.3)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border)'">🗑 Reset</button>
+    </div>
+    <div id="leaderboardBox" class="lb-box"></div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a class="footer-logo" href="index.html">Cyber<span>Shield</span></a>
+        <p class="footer-about">Platform edukasi keamanan siber interaktif untuk meningkatkan literasi digital masyarakat Indonesia.</p>
+        <div class="footer-badges"><span class="footer-badge">🔒 Gratis</span><span class="footer-badge">🎮 Interaktif</span></div>
+      </div>
+      <div>
+        <div class="footer-col-title">Navigasi</div>
+        <div class="footer-links">
+          <a href="index.html">Home</a><a href="edukasi.html">Edukasi</a>
+          <a href="simulasi.html">Simulasi</a><a href="tips.html">Tips</a><a href="about.html">Tentang</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Fitur Simulasi</div>
+        <div class="footer-links">
+          <a href="simulasi.html">18+ Soal dalam Pool</a>
+          <a href="simulasi.html">Diacak Tiap Sesi</a>
+          <a href="simulasi.html">Fitur Jeda & Keluar</a>
+          <a href="simulasi.html">Timer Real-time</a>
+          <a href="simulasi.html">Breakdown Hasil</a>
+        </div>
+      </div>
+    </div>
+     <div class="footer-bottom">
+      <p class="footer-copy">© 2026 CyberShield — Tim Hoga hoga</p>
+      <p class="footer-made">Tema: <span>INNOVATE</span> — Know the Threat. Be the Shield.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+const CS = {
+  get: ()=>{ try{return JSON.parse(localStorage.getItem('cs_data')||'{}')}catch(e){return {}} },
+  set: (d)=>{ try{localStorage.setItem('cs_data',JSON.stringify(d))}catch(e){} }
+};
+
+const cursor = document.getElementById('cur');
+const trail  = document.getElementById('trail');
+if(cursor && trail){
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX+'px'; cursor.style.top = e.clientY+'px';
+    setTimeout(()=>{ trail.style.left=e.clientX+'px'; trail.style.top=e.clientY+'px'; },90);
+  });
+  document.querySelectorAll('a,button').forEach(el=>{
+    el.addEventListener('mouseenter',()=>cursor.classList.add('hover'));
+    el.addEventListener('mouseleave',()=>cursor.classList.remove('hover'));
+  });
+}
+
+window.addEventListener('scroll',()=>{
+  const nb=document.getElementById('navbar');
+  const st=document.getElementById('scrollTop');
+  if(nb) nb.classList.toggle('scrolled', window.scrollY>60);
+  if(st) st.classList.toggle('show', window.scrollY>400);
+});
+
+function toggleMenu(){ document.getElementById('mobMenu').classList.toggle('open'); }
+
+const revealObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){e.target.classList.add('visible');revealObs.unobserve(e.target);} });
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
+
+function getBadge(pct){
+  if(pct===100) return {emoji:'🏆',title:'Perfect Defender',color:'#34d399',bg:'rgba(16,185,129,.08)',border:'rgba(16,185,129,.3)'};
+  if(pct>=80)   return {emoji:'🛡️',title:'Cyber Defender',color:'var(--cyan)',bg:'rgba(0,229,255,.06)',border:'rgba(0,229,255,.2)'};
+  if(pct>=60)   return {emoji:'🔰',title:'Digital Guardian',color:'#fbbf24',bg:'rgba(251,191,36,.06)',border:'rgba(251,191,36,.25)'};
+  return           {emoji:'⚠️',title:'Butuh Perlindungan',color:'#f87171',bg:'rgba(239,68,68,.06)',border:'rgba(239,68,68,.25)'};
+}
+
+function fmtTime(ms){ const s=Math.floor(ms/1000); return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
+
+function emailMockup(from,fromEmail,subject,body,link,isPhishing){
+  const flags=[];
+  if(fromEmail.includes('gmail.com')||fromEmail.includes('yahoo.com')||fromEmail.includes('outlook.com')) flags.push('Pengirim menggunakan email pribadi, bukan domain institusi resmi');
+  if(link&&(link.includes('blogspot')||link.includes('.xyz')||link.includes('bit.ly')||link.includes('verify')||link.includes('.tk')||link.includes('.net/') )) flags.push('URL tujuan menggunakan domain mencurigakan');
+  if(body.includes('URGENT')||body.includes('jam')||body.includes('segera')||body.includes('Segera')||body.includes('cepat')) flags.push('Menciptakan tekanan dan urgensi palsu');
+  return `<div class="email-mock-v2">
+    <div class="emv2-chrome"><div class="emv2-dots"><span></span><span></span><span></span></div><div class="emv2-title">📧 Email — Kotak Masuk</div></div>
+    <div class="emv2-inbox-bar"><span class="emv2-inbox-label">KOTAK MASUK (1 pesan baru)</span></div>
+    <div class="emv2-email-row ${isPhishing?'emv2-phishing':''}">
+      <div class="emv2-avatar">${from.charAt(0).toUpperCase()}</div>
+      <div class="emv2-email-content" style="flex:1">
+        <div class="emv2-email-top"><span class="emv2-sender">${from}</span><span class="emv2-addr">&lt;${fromEmail}&gt;</span>${isPhishing?'<span class="emv2-flag-badge">⚠ Periksa domain</span>':''}</div>
+        <div class="emv2-subject">${subject}</div>
+        <div class="emv2-body">${body}</div>
+        ${link?`<div class="emv2-link-row"><span class="emv2-link-icon">🔗</span><span class="emv2-url ${isPhishing?'emv2-url-bad':''}">${link}</span>${isPhishing?'<span class="emv2-url-warn">← domain mencurigakan</span>':''}</div>`:''}
+      </div>
+    </div>
+    ${flags.length>0?`<div class="emv2-redflag-box"><div class="emv2-rf-title">🔍 TANDA BAHAYA TERDETEKSI:</div>${flags.map(f=>`<div class="emv2-rf-item">⚠ ${f}</div>`).join('')}</div>`:''}
+  </div>`;
+}
+
+function terminalMockup(title, lines){
+  return `<div class="term-mock"><div class="term-bar"><span class="td r"></span><span class="td y"></span><span class="td g"></span><span style="font-family:'Space Mono',monospace;font-size:11px;color:#5a7a94;margin-left:8px">${title}</span></div><div class="term-body">${lines.map(l=>`<div class="tl ${l.cls||''}">${l.text}</div>`).join('')}</div></div>`;
+}
+
+function waMockup(sender,message,isVerified){
+  return `<div class="wa-mock-v2">
+    <div class="wam-chrome"><div class="wam-dots"><span></span><span></span><span></span></div><div class="wam-title">💬 WhatsApp</div></div>
+    <div class="wam-header"><div class="wam-avatar">📱</div><div class="wam-meta"><div class="wam-name">${sender} ${isVerified?'<span class="wam-verified">✓ Terverifikasi</span>':'<span class="wam-unknown">❓ Nomor Tidak Dikenal</span>'}</div><div class="wam-status">${isVerified?'Kontak tersimpan':'Bukan dari kontak tersimpan'}</div></div></div>
+    <div class="wam-chat-area"><div class="wam-bubble">${message}<span class="wam-time">09:41 ✓✓</span></div></div>
+    ${!isVerified?'<div class="wam-warning">⚠ Pesan dari nomor yang tidak ada di kontak. Waspadai link atau permintaan data apapun.</div>':''}
+  </div>`;
+}
+
+function browserMockup(url,pageTitle,formHTML,isPhishing){
+  const isHTTPS=url.startsWith('https');
+  return `<div class="browser-mock">
+    <div class="bm-chrome"><div class="bm-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><div class="bm-url-bar"><span class="bm-lock ${isHTTPS?'bm-lock-secure':'bm-lock-bad'}">${isHTTPS?'🔒':'⚠'}</span><span class="bm-domain ${isPhishing?'bm-domain-bad':''}">${url}</span>${isPhishing?'<span class="bm-not-secure">Tidak Aman</span>':''}</div></div>
+    <div class="bm-body"><div class="bm-page-title">${pageTitle}</div>${formHTML}${isPhishing?`<div class="bm-warning-bar">⚠ URL ini bukan situs resmi yang dimaksud. Perhatikan domain lengkapnya!</div>`:''}</div>
+  </div>`;
+}
+
+const allQuestions = [
+  {
+    type:'Phishing',
+    body:'Kamu menerima email berikut saat mengecek kotak masuk. Apa yang harus kamu lakukan?',
+    visual: emailMockup('Tim Keamanan Bank','noreply-security@gmail.com','[URGENT] Akun Anda Terancam Diblokir!','Yth. Nasabah,<br>Sistem kami mendeteksi aktivitas mencurigakan. Harap konfirmasi PIN dan nomor rekening Anda SEGERA lewat link berikut dalam <strong>2 jam</strong> atau akun otomatis diblokir.','http://secure-bank-konfirmasi.xyz/verify-pin',true),
+    choices:[{t:'Klik link dan masukkan PIN sesuai instruksi',c:false},{t:'Hubungi call center bank di nomor resmi yang tertera di kartu',c:true},{t:'Balas email dan tanyakan apakah ini asli',c:false},{t:'Teruskan ke teman untuk minta pendapat',c:false}],
+    ok:'Tepat! Domain pengirim @gmail.com jelas bukan milik bank manapun. URL juga mencurigakan dengan TLD .xyz. Bank tidak pernah meminta PIN lewat email. Selalu hubungi call center dari nomor resmi.',
+    bad:'Ini Phishing! Tanda bahaya: (1) pengirim pakai @gmail.com bukan domain bank, (2) URL .xyz mencurigakan, (3) tekanan 2 jam adalah manipulasi psikologis. Jangan pernah klik link dari email seperti ini.'
+  },
+  {
+    type:'Phishing',
+    body:'SMS ini masuk dari nomor tidak dikenal. Apa responsmu?',
+    visual: waMockup('+62-812-XXXX-XXXX (SMS Tidak Dikenal)','⚠ [INFO BANK] Kartu debit Anda diblokir karena aktivitas mencurigakan. Aktifkan kembali segera:<br><span style="color:#00e5ff">http://bit.ly/aktifkan-kartu-2026</span><br>atau kartu dinonaktifkan permanen dalam 6 jam.',false),
+    choices:[{t:'Klik link untuk mengaktifkan kartu agar tidak terblokir',c:false},{t:'Abaikan SMS, cek status kartu di aplikasi resmi atau hubungi call center',c:true},{t:'Balas SMS minta konfirmasi apakah ini resmi',c:false},{t:'Screenshot dan forward ke grup keluarga',c:false}],
+    ok:'Benar! Bank tidak mengirim link pemblokiran via SMS dari nomor HP biasa. bit.ly menyembunyikan URL tujuan. Selalu cek status kartu di aplikasi resmi atau hubungi call center.',
+    bad:'Smishing (SMS Phishing)! Tanda bahayanya: nomor HP biasa bukan shortcode resmi, link bit.ly menyembunyikan tujuan, ancaman 6 jam untuk ciptakan kepanikan. Verifikasi selalu lewat saluran resmi.'
+  },
+  {
+    type:'Phishing',
+    body:'Saat browsing, tiba-tiba muncul pop-up di layar. Apa yang kamu lakukan?',
+    visual: terminalMockup('⚠ POP-UP BROWSER',[
+      {text:'╔══════════════════════════════════╗',cls:'tl-err'},
+      {text:'║  ⚠  VIRUS TERDETEKSI!            ║',cls:'tl-err'},
+      {text:'║  Komputer kamu terinfeksi         ║',cls:'tl-warn'},
+      {text:'║  3 virus berbahaya ditemukan!     ║',cls:'tl-warn'},
+      {text:'║  [HAPUS SEKARANG] ← Klik ini!    ║',cls:'tl-err'},
+      {text:'║  Hubungi 0800-TECH-SUPPORT        ║',cls:'tl-warn'},
+      {text:'╚══════════════════════════════════╝',cls:'tl-err'},
+      {text:'> Browser: Google Chrome',cls:'tl-info'},
+      {text:'> Sumber: random-site.xyz/popup',cls:'tl-warn'},
+    ]),
+    choices:[{t:'Klik "Hapus Sekarang" sesuai instruksi',c:false},{t:'Hubungi nomor telepon yang tertera di pop-up',c:false},{t:'Tutup pop-up dengan tekan X atau Alt+F4, jangan klik apapun di dalamnya',c:true},{t:'Restart komputer untuk menghilangkan virus',c:false}],
+    ok:'Benar! Pop-up seperti ini adalah scareware atau tech support scam. Browser tidak pernah tahu apakah ada virus di komputermu. Tutup tab/jendela tersebut. Jangan klik apapun dan jangan hubungi nomor yang tertera.',
+    bad:'Ini Tech Support Scam / Scareware! Browser tidak bisa mendeteksi virus. Pop-up ini dirancang menakut-nakuti agar kamu mengunduh malware atau menelepon penipu yang mengaku teknisi.'
+  },
+  {
+    type:'Phishing',
+    body:'Saat hendak login ke website bank, URL bar menampilkan ini:',
+    visual: browserMockup('http://bank-online.login-verify.net/masuk','Bank Online — Silakan Masuk ke Akun Anda',`<div style="padding:16px;display:flex;flex-direction:column;gap:10px"><div style="font-size:11px;color:#5a7a94;margin-bottom:2px">Username</div><div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:10px;font-size:13px;color:#5a7a94">Masukkan username...</div><div style="font-size:11px;color:#5a7a94;margin-top:4px">Password</div><div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:10px;font-size:13px;color:#5a7a94">••••••••</div><div style="background:#00e5ff;color:#040d1a;border-radius:6px;padding:10px;text-align:center;font-size:13px;font-weight:700;margin-top:4px">Masuk</div></div>`,true),
+    choices:[{t:'Login saja — tampilan websitenya mirip asli',c:false},{t:'Tutup tab dan ketik alamat bank langsung di address bar',c:true},{t:'Login tapi langsung logout setelah selesai',c:false},{t:'Refresh halaman dulu baru login',c:false}],
+    ok:'Benar! Domain "bank-online.login-verify.net" adalah domain palsu. Tidak ada HTTPS, dan structure domain mengarahkan ke "login-verify.net" bukan ke bank asli. Selalu ketik alamat resmi bank langsung.',
+    bad:'Domain palsu yang dibuat mirip situs bank asli! Teknik subdomain spoofing ini sering tidak disadari. Data yang dimasukkan langsung dikirim ke penyerang. Selalu perhatikan domain lengkap di address bar.'
+  },
+  {
+    type:'Malware',
+    body:'Kamu mengunduh software gratis dari situs tidak resmi. Ini yang muncul saat instalasi:',
+    visual: terminalMockup('⚠ PERMISSION REQUEST',[
+      {text:'> Installer: VideoEditor_Free_Pro_v8.exe',cls:'tl-warn'},
+      {text:'> Sumber: free-software-download.net',cls:'tl-warn'},
+      {text:'Aplikasi ini meminta izin:',cls:'tl-info'},
+      {text:'  ✗ Akses penuh ke semua file & folder',cls:'tl-err'},
+      {text:'  ✗ Baca & kirim semua SMS',cls:'tl-err'},
+      {text:'  ✗ Akses kamera & mikrofon (background)',cls:'tl-err'},
+      {text:'  ✗ Jalankan otomatis saat startup',cls:'tl-err'},
+      {text:'  ✗ Akses data perbankan tersimpan',cls:'tl-err'},
+      {text:'> Izinkan semua akses? [Lanjutkan/Batalkan]',cls:'tl-info'},
+    ]),
+    choices:[{t:'Lanjutkan — karena butuh software ini',c:false},{t:'Batalkan, hapus file, jalankan full scan antivirus terbaru',c:true},{t:'Izinkan akses file saja, tolak sisanya',c:false},{t:'Restart dan coba install ulang',c:false}],
+    ok:'Benar! Software edit video tidak butuh akses SMS, kamera background, atau data perbankan. Ini jelas spyware/trojan. Hapus segera, perbarui antivirus, lakukan full scan.',
+    bad:'Berbahaya! Akses SMS + kamera + data perbankan dari software edit video adalah tanda jelas spyware. Setelah diinstall, ia akan mencuri data secara diam-diam termasuk OTP banking.'
+  },
+  {
+    type:'Malware',
+    body:'Antivirus mendeteksi ancaman saat kamu mengunduh file:',
+    visual: terminalMockup('ANTIVIRUS — THREAT DETECTED',[
+      {text:'█ ANCAMAN TERDETEKSI',cls:'tl-err'},
+      {text:'File: Office_Pro_2025_Activator.exe',cls:'tl-warn'},
+      {text:'Sumber: crack-software-gratis.blogspot.com',cls:'tl-warn'},
+      {text:'Jenis: Win32:Trojan.Gen / Backdoor.Agent',cls:'tl-err'},
+      {text:'Risiko: KRITIS — Dapat mencuri password & data',cls:'tl-err'},
+      {text:'Aksi: File dikarantina otomatis',cls:'tl-info'},
+      {text:'Rekomendasi: Hapus permanen & scan sistem',cls:'tl-info'},
+    ]),
+    choices:[{t:'Abaikan peringatan — mungkin false positive',c:false},{t:'Hapus file permanen dan cari software versi resmi',c:true},{t:'Matikan antivirus sementara, lalu buka file',c:false},{t:'Restore dari karantina dan coba jalankan',c:false}],
+    ok:'Tepat! Antivirus bekerja dengan benar. Trojan/Backdoor dapat membuka akses jarak jauh ke perangkatmu. Hapus dan cari software resmi — banyak yang tersedia gratis secara legal.',
+    bad:'Sangat berbahaya! Menonaktifkan antivirus untuk membuka file yang sudah dideteksi = mengundang malware masuk. Trojan.Gen bisa mencuri password, data perbankan, dan menjadikan perangkatmu bagian botnet.'
+  },
+  {
+    type:'Malware',
+    body:'Seseorang mengirimkan file ini via WhatsApp dengan pesan "buka ya, penting":',
+    visual: terminalMockup('FILE DITERIMA VIA WHATSAPP',[
+      {text:'Pengirim: Nomor tidak dikenal',cls:'tl-warn'},
+      {text:'File: Bukti_Transfer.apk  (3.2 MB)',cls:'tl-err'},
+      {text:'Tipe: Android APK — BUKAN dari Play Store',cls:'tl-err'},
+      {text:'Pesan: "Buka ya ini bukti transfernya"',cls:'tl-warn'},
+      {text:'> Play Protect: FILE INI DARI SUMBER TIDAK DIKENAL',cls:'tl-err'},
+      {text:'> Izinkan install dari sumber ini? [Ya/Tidak]',cls:'tl-info'},
+    ]),
+    choices:[{t:'Pilih Ya dan install karena pengirim bilang ini bukti transfer',c:false},{t:'Pilih Tidak, jangan install APK dari luar Play Store',c:true},{t:'Install dulu, kalau ada masalah uninstall lagi',c:false},{t:'Tanya dulu ke pengirim apa isinya',c:false}],
+    ok:'Benar! File APK dari luar Play Store sangat berisiko, apalagi dari nomor tidak dikenal. "Bukti transfer" yang asli tidak pernah berupa file APK. Ini salah satu modus malware yang paling umum.',
+    bad:'Modus APK berbahaya! File APK bisa berisi RAT (Remote Access Trojan) yang setelah diinstall bisa mencuri OTP banking, merekam layar, dan menguras saldo. Jangan pernah install APK dari luar Play Store.'
+  },
+  {
+    type:'Ransomware',
+    body:'Kamu membuka laptop dan menemukan tampilan ini di layar:',
+    visual: terminalMockup('⚠ RANSOMWARE DETECTED',[
+      {text:'╔══════════════════════════════════════╗',cls:'tl-err'},
+      {text:'║  YOUR FILES HAVE BEEN ENCRYPTED      ║',cls:'tl-err'},
+      {text:'╠══════════════════════════════════════╣',cls:'tl-err'},
+      {text:'  3.200+ file dienkripsi dengan AES-256',cls:'tl-warn'},
+      {text:'  Ekstensi berubah menjadi .LOCKED',cls:'tl-warn'},
+      {text:'  TUNTUTAN: 0.5 BTC (~$20.000 USD)',cls:'tl-err'},
+      {text:'  BATAS WAKTU: 71:58:22 tersisa',cls:'tl-warn'},
+      {text:'  Backup terakhir ditemukan: TIDAK ADA',cls:'tl-err'},
+      {text:'╚══════════════════════════════════════╝',cls:'tl-err'},
+    ]),
+    choices:[{t:'Bayar tebusan sesuai instruksi agar file cepat kembali',c:false},{t:'Cabut koneksi jaringan (LAN/WiFi) segera, lalu hubungi ahli IT Security',c:true},{t:'Format ulang perangkat sekarang juga',c:false},{t:'Matikan dan nyalakan berulang kali',c:false}],
+    ok:'Benar! Langkah darurat: (1) Isolasi dari jaringan SEGERA agar tidak menyebar ke perangkat lain, (2) Jangan matikan perangkat, (3) Hubungi IT Security profesional, (4) Cek nomeedecryptor.eu untuk tool gratis.',
+    bad:'Membayar tebusan TIDAK menjamin file kembali. Prioritas utama: isolasi jaringan untuk cegah penyebaran ke perangkat lain, lalu hubungi ahli. Bayar tebusan juga mendanai kejahatan siber.'
+  },
+  {
+    type:'Ransomware',
+    body:'Sebagai tindakan pencegahan, mana strategi paling efektif menghadapi ancaman ransomware?',
+    visual: terminalMockup('CYBERSHIELD — ANALISIS RISIKO',[
+      {text:'Ancaman: Ransomware Brain Cipher (PDN 2024)',cls:'tl-err'},
+      {text:'Dampak: 239 instansi, 44 bandara terdampak',cls:'tl-warn'},
+      {text:'Penyebab utama: Tidak ada backup yang memadai',cls:'tl-warn'},
+      {text:'Tebusan diminta: Rp 131 Miliar',cls:'tl-err'},
+      {text:'─────────────────────────────',cls:'tl-info'},
+      {text:'Pertanyaan: Apa pencegahan paling efektif?',cls:'tl-info'},
+    ]),
+    choices:[{t:'Pasang antivirus premium dan update rutin',c:false},{t:'Backup data rutin menggunakan sistem 3-2-1 (3 salinan, 2 media, 1 offline)',c:true},{t:'Bayar ransomware insurance agar bisa tebus kalau kena',c:false},{t:'Matikan koneksi internet saat tidak dipakai',c:false}],
+    ok:'Tepat! Backup 3-2-1 adalah satu-satunya cara pulih dari ransomware tanpa membayar tebusan. Kasus PDN 2024 yang merugikan Rp 131 miliar bisa dihindari jika ada backup offline yang memadai.',
+    bad:'Antivirus penting tapi tidak cukup. Ransomware modern bisa bypass antivirus. Backup 3-2-1 adalah pertahanan sesungguhnya — jika diserang, kamu bisa pulih tanpa bayar tebusan apapun.'
+  },
+  {
+    type:'Ransomware',
+    body:'Rekan kerja meneruskan email ini dan minta kamu buka lampirannya:',
+    visual: emailMockup('HR Department','hr.department@company-group.net','[URGENT] Update Gaji Karyawan Q1 2026','Kepada seluruh karyawan,<br><br>Mohon buka dan tanda tangani dokumen pembaruan gaji terlampir sebelum EOD hari ini. Dokumen dalam format .xlsm untuk memudahkan pengisian.<br><br>Harap aktifkan macros saat membuka file.<br><br>— Tim HR','(Lampiran: Gaji_Update_Q1_2026.xlsm)',true),
+    choices:[{t:'Buka dan aktifkan macros sesuai instruksi',c:false},{t:'Hubungi HR secara langsung untuk verifikasi sebelum membuka lampiran',c:true},{t:'Buka file tapi jangan aktifkan macros',c:false},{t:'Teruskan ke rekan lain untuk dicek bersama',c:false}],
+    ok:'Benar! Email HR yang meminta aktifkan macros adalah tanda bahaya besar. Malware sering masuk lewat dokumen Office dengan macros jahat. Verifikasi langsung ke HR via telepon atau tatap muka sebelum membuka.',
+    bad:'Modus Malware via Macros! File .xlsm dengan permintaan aktifkan macros adalah cara umum menyebarkan ransomware dan trojan. Ini bisa menginfeksi seluruh jaringan kantor. Selalu verifikasi sebelum buka lampiran mencurigakan.'
+  },
+  {
+    type:'Social Engineering',
+    body:'Telepon masuk dari seseorang yang mengaku dari tim teknis penyedia layanan:',
+    visual: terminalMockup('PANGGILAN MASUK',[
+      {text:'"Halo, saya dari Tim Teknis provider internet."',cls:''},
+      {text:'"Kami deteksi aktivitas berbahaya dari router Anda."',cls:'tl-err'},
+      {text:'"Untuk perbaiki, kami butuh Anda install aplikasi"',cls:'tl-warn'},
+      {text:'"remote access bernama AnyDesk sekarang."',cls:'tl-err'},
+      {text:'"Lalu share screen dan beri kode aksesnya."',cls:'tl-err'},
+      {text:'"Ini darurat, harus dilakukan dalam 10 menit!"',cls:'tl-warn'},
+      {text:'> Identitas penelepon: TIDAK DAPAT DIVERIFIKASI',cls:'tl-warn'},
+    ]),
+    choices:[{t:'Install AnyDesk dan bagikan kode akses karena ini darurat',c:false},{t:'Tolak, tutup telepon, hubungi call center resmi provider',c:true},{t:'Install AnyDesk tapi pantau terus apa yang mereka lakukan',c:false},{t:'Minta mereka kirim email resmi dulu baru ditindaklanjuti',c:false}],
+    ok:'Benar! Teknik ini disebut Remote Access Scam. Provider internet resmi tidak pernah meminta install aplikasi remote access via telepon. Hubungi call center resmi dari website atau tagihan kamu.',
+    bad:'Remote Access Scam! Setelah AnyDesk dibagikan, penipu bisa akses penuh ke perangkatmu — membuka rekening, transfer dana, atau instalasi malware. Tutup telepon dan hubungi provider lewat saluran resmi.'
+  },
+  {
+    type:'Social Engineering',
+    body:'Pesan WhatsApp dari nomor tidak dikenal, mengaku rekan bisnis:',
+    visual: waMockup('+62-813-XXXX-XXXX (Tidak Dikenal)','Halo, ini Pak Budi dari PT Mitra Usaha. Saya sudah transfer DP untuk order kemarin tapi salah rekening. Bisa minta foto KTP dan data rekening Anda untuk saya verifikasi dan transfer ulang ke rekening yang benar?',false),
+    choices:[{t:'Kirimkan foto KTP dan data rekening karena kasusnya masuk akal',c:false},{t:'Tolak, hubungi "Pak Budi" lewat nomor yang sudah dikenal sebelumnya',c:true},{t:'Kirim data rekening saja tanpa KTP',c:false},{t:'Minta bukti transfer yang salah tadi dulu',c:false}],
+    ok:'Tepat! Meminta foto KTP dan data rekening via WhatsApp dari nomor tidak dikenal adalah modus penipuan. Verifikasi selalu lewat kontak yang sudah dikenal sebelumnya, bukan dari nomor yang menghubungi kamu.',
+    bad:'Social Engineering klasik! Data KTP + rekening bisa dipakai untuk pinjaman online ilegal atas nama kamu. Selalu verifikasi via kontak yang sudah tersimpan, bukan dari nomor yang menghubungi tiba-tiba.'
+  },
+  {
+    type:'Social Engineering',
+    body:'Kamu menerima notifikasi login ini di email:',
+    visual: terminalMockup('NOTIFIKASI KEAMANAN — EMAIL',[
+      {text:'PERINGATAN: Login Baru Terdeteksi',cls:'tl-warn'},
+      {text:'Akun: akun_email_kamu@mail.com',cls:'tl-info'},
+      {text:'Perangkat: Windows PC — Lokasi: Frankfurt, Jerman',cls:'tl-err'},
+      {text:'Waktu: 02:37 WIB (saat kamu tidur)',cls:'tl-err'},
+      {text:'Status: Login BERHASIL',cls:'tl-err'},
+      {text:'─────────────────────────────────',cls:'tl-info'},
+      {text:'Apakah ini kamu?',cls:'tl-info'},
+    ]),
+    choices:[{t:'Tidak apa-apa, mungkin Google salah deteksi lokasi',c:false},{t:'Segera ganti password dan aktifkan 2FA sekarang',c:true},{t:'Tunggu dulu untuk melihat apakah ada aktivitas mencurigakan lain',c:false},{t:'Logout dari semua perangkat saja cukup',c:false}],
+    ok:'Benar! Login dari Jerman pukul 02.37 saat tidur hampir pasti bukan kamu. Segera: (1) Ganti password, (2) Aktifkan 2FA, (3) Periksa email forwarding yang mungkin ditambahkan penyerang.',
+    bad:'Ini bukan false alarm! Login dari luar negeri di tengah malam saat tidur = akunmu dibobol. Menunggu memberi penyerang lebih banyak waktu. Ganti password dan aktifkan 2FA segera.'
+  },
+  {
+    type:'Password & Akun',
+    body:'Kamu diminta membuat password baru untuk akun keuangan. Mana yang paling aman?',
+    visual: terminalMockup('PASSWORD STRENGTH CHECKER',[
+      {text:'A: "indonesia123"      → Kekuatan: SANGAT LEMAH',cls:'tl-err'},
+      {text:'B: "Budi2005"          → Kekuatan: SANGAT LEMAH',cls:'tl-err'},
+      {text:'C: "P@ssword!"         → Kekuatan: LEMAH',cls:'tl-warn'},
+      {text:'D: "T3r!ngK4t-Aman#9z" → Kekuatan: SANGAT KUAT',cls:'tl-info'},
+      {text:'─────────────────────────────────',cls:''},
+      {text:'> Rekomendasi: min 16 karakter, huruf besar+kecil+simbol',cls:'tl-info'},
+    ]),
+    choices:[{t:'A — mudah diingat dan cukup aman',c:false},{t:'B — pakai tanggal lahir agar tidak lupa',c:false},{t:'C — sudah ada simbol jadi cukup',c:false},{t:'D — panjang, acak, dan kompleks',c:true}],
+    ok:'Benar! Password kuat adalah yang panjang (16+ karakter), kombinasi huruf besar-kecil-angka-simbol, dan tidak mengandung info pribadi. Gunakan password manager seperti Bitwarden (gratis) untuk menyimpannya.',
+    bad:'Password pendek dan mudah ditebak bisa dipecahkan dalam hitungan detik oleh program brute-force. Password terkuat adalah yang panjang, acak, dan tidak mengandung info pribadi apapun.'
+  },
+  {
+    type:'Password & Akun',
+    body:'Kamu menerima kode OTP ini tanpa melakukan aktivitas apapun:',
+    visual: waMockup('Nomor Tidak Dikenal','[KODE OTP] Kode verifikasi akun marketplace kamu: 847291. Jangan berikan kode ini kepada siapapun. Berlaku 5 menit.',false),
+    choices:[{t:'Kode masuk sendiri berarti sistemnya error, abaikan saja',c:false},{t:'Segera ganti password akun tersebut karena mungkin ada yang coba masuk',c:true},{t:'Tunggu dulu, kalau tidak ada yang aneh berarti aman',c:false},{t:'Kirim kode ke CS marketplace untuk lapor error',c:false}],
+    ok:'Benar! OTP yang datang tanpa kamu minta = ada yang mencoba masuk ke akunmu dengan password yang mungkin sudah bocor. Segera ganti password dan aktifkan 2FA sebelum mereka berhasil.',
+    bad:'OTP tak terduga = ada yang sedang mencoba login ke akunmu! Mereka sudah punya passwordmu. Jika kamu tidak segera ganti password, percobaan berikutnya mungkin berhasil — terutama jika ada akses ke nomor HP.'
+  },
+  {
+    type:'Password & Akun',
+    body:'Temanmu menyarankan cara ini untuk mengelola password. Mana yang paling aman?',
+    visual: terminalMockup('METODE PENYIMPANAN PASSWORD',[
+      {text:'A: Pakai password yang sama di semua akun',cls:'tl-err'},
+      {text:'B: Simpan semua password di Notes HP',cls:'tl-warn'},
+      {text:'C: Tulis di buku catatan fisik di rumah',cls:'tl-warn'},
+      {text:'D: Gunakan password manager terenkripsi',cls:'tl-info'},
+      {text:'   (contoh: Bitwarden gratis, 1Password)',cls:'tl-info'},
+      {text:'─────────────────────────────────────────',cls:''},
+      {text:'> Tiap akun sebaiknya punya password unik',cls:'tl-info'},
+    ]),
+    choices:[{t:'A — lebih praktis karena tidak perlu ingat banyak',c:false},{t:'B — bisa dikunci dengan PIN HP',c:false},{t:'C — tidak bisa di-hack karena offline',c:false},{t:'D — password manager adalah cara paling aman dan praktis',c:true}],
+    ok:'Benar! Password manager terenkripsi seperti Bitwarden adalah cara terbaik. Ia menghasilkan password unik dan kuat untuk setiap akun, menyimpannya dengan enkripsi, dan mudah diakses dengan satu master password.',
+    bad:'Password sama di semua akun sangat berbahaya — jika satu bocor, semua bocor. Notes HP tidak terenkripsi. Buku catatan bisa hilang. Password manager adalah solusi terbaik untuk keamanan dan kemudahan.'
+  },
+  {
+    type:'Man-in-the-Middle',
+    body:'Kamu di kafe dan perlu melakukan transaksi keuangan. Jaringan yang tersedia:',
+    visual: terminalMockup('JARINGAN WIFI TERSEDIA',[
+      {text:'1. "CafeWifi_Free" — Open (tanpa password)',cls:'tl-warn'},
+      {text:'2. "Free_CoffeeShop_Net" — Open (tanpa password)',cls:'tl-warn'},
+      {text:'3. Data Seluler pribadi (4G LTE) — Full bar',cls:'tl-info'},
+      {text:'─────────────────────────────────────',cls:''},
+      {text:'TUGAS: Transfer dana ke rekening teman',cls:''},
+      {text:'untuk keperluan mendesak',cls:''},
+    ]),
+    choices:[{t:'Pakai WiFi kafe — sudah ada HTTPS jadi aman',c:false},{t:'Gunakan data seluler untuk transaksi ini',c:true},{t:'Pakai WiFi kafe tapi mode incognito browser',c:false},{t:'Cari jaringan WiFi yang ada passwordnya di sekitar',c:false}],
+    ok:'Benar! Untuk transaksi keuangan, selalu gunakan data seluler. WiFi publik terbuka rentan Evil Twin attack dan SSL Stripping. Mode incognito hanya menyembunyikan history lokal, tidak melindungi dari penyadapan jaringan.',
+    bad:'WiFi publik sangat berisiko untuk transaksi keuangan. Penyerang bisa buat hotspot palsu dengan nama mirip dan intercept data. SSL Stripping bisa mengekspos data meski terlihat ada HTTPS. Data seluler jauh lebih aman.'
+  },
+  {
+    type:'Man-in-the-Middle',
+    body:'Kamu mengklik link dari email dan browser menampilkan peringatan ini:',
+    visual: terminalMockup('⚠ PERINGATAN SERTIFIKAT BROWSER',[
+      {text:'Koneksi tidak privat!',cls:'tl-err'},
+      {text:'Penyerang mungkin mencoba mencuri informasi',cls:'tl-err'},
+      {text:'dari situs ini (misalnya, kata sandi, pesan,',cls:'tl-warn'},
+      {text:'atau kartu kredit)',cls:'tl-warn'},
+      {text:'NET::ERR_CERT_COMMON_NAME_INVALID',cls:'tl-err'},
+      {text:'─────────────────────────────────',cls:'tl-info'},
+      {text:'[Kembali ke Keamanan] [Lanjutkan (tidak aman)]',cls:'tl-warn'},
+    ]),
+    choices:[{t:'Klik "Lanjutkan (tidak aman)" karena websitenya penting',c:false},{t:'Klik "Kembali ke Keamanan" dan jangan lanjutkan',c:true},{t:'Refresh halaman dan coba lagi',c:false},{t:'Coba di browser lain mungkin bisa',c:false}],
+    ok:'Benar! Peringatan sertifikat SSL adalah tanda serius bahwa koneksi tidak aman atau ada serangan MitM aktif. Jangan pernah lanjutkan ke situs yang memunculkan peringatan ini, terutama untuk akun atau transaksi.',
+    bad:'Peringatan sertifikat bukan sesuatu yang bisa diabaikan! Ini bisa berarti ada serangan Man-in-the-Middle aktif yang mencoba menyadap datamu. Selalu klik "Kembali ke Keamanan" dan jangan lanjutkan.'
+  }
+];
+
+const QUESTIONS_PER_SESSION = 7;
+let activeQuestions = [];
+let qIdx = 0, score = 0, answered = false;
+let timerInt = null, startTime = null, pausedAt = null, totalPaused = 0;
+let log = [];
+let isPaused = false;
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function startTimer(){
+  startTime = Date.now();
+  totalPaused = 0;
+  timerInt = setInterval(()=>{
+    if(isPaused) return;
+    const elapsed = Date.now() - startTime - totalPaused;
+    const el = document.getElementById('simTimer');
+    if(el) el.textContent = '⏱ ' + fmtTime(elapsed);
+  },1000);
+}
+
+function getElapsed(){
+  return Date.now() - startTime - totalPaused;
+}
+
+function beginQuiz(){
+  activeQuestions = shuffle(allQuestions).slice(0, QUESTIONS_PER_SESSION);
+  qIdx = 0; score = 0; answered = false; log = [];
+  isPaused = false;
+  document.getElementById('totalVal').textContent = QUESTIONS_PER_SESSION;
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('resultScreen').classList.remove('show');
+  document.getElementById('quizArea').style.display = 'block';
+  const te = document.getElementById('simTimer');
+  if(te) te.textContent = '⏱ 00:00';
+  clearInterval(timerInt);
+  startTimer();
+  loadQ();
+}
+
+function pauseQuiz(){
+  if(isPaused) return;
+  isPaused = true;
+  pausedAt = Date.now();
+  document.getElementById('pauseOverlay').classList.add('show');
+}
+
+function resumeQuiz(){
+  if(!isPaused) return;
+  isPaused = false;
+  totalPaused += Date.now() - pausedAt;
+  document.getElementById('pauseOverlay').classList.remove('show');
+}
+
+function confirmExit(){
+  pauseQuiz();
+  const pauseBox = document.querySelector('.pause-box');
+  pauseBox.innerHTML = `
+    <span class="pause-icon">⚠️</span>
+    <div class="pause-title">Yakin mau keluar?</div>
+    <div class="pause-sub">Progres sesi ini akan hilang dan tidak tersimpan.</div>
+    <div class="pause-btns">
+      <button class="btn-secondary" onclick="cancelExit()">↩ Lanjutkan Simulasi</button>
+      <button class="btn-primary" style="background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 0 24px rgba(239,68,68,.3)" onclick="exitToStart()">✕ Keluar</button>
+    </div>`;
+}
+
+function cancelExit(){
+  document.querySelector('.pause-box').innerHTML = `
+    <span class="pause-icon">⏸</span>
+    <div class="pause-title">Simulasi Dijeda</div>
+    <div class="pause-sub">Timer dihentikan. Lanjutkan kapanpun kamu siap.</div>
+    <div class="pause-btns">
+      <button class="btn-primary" onclick="resumeQuiz()">▶ Lanjutkan</button>
+      <button class="btn-secondary" onclick="exitToStart()">⏏ Keluar ke Menu</button>
+    </div>`;
+  resumeQuiz();
+}
+
+function exitToStart(){
+  clearInterval(timerInt);
+  isPaused = false;
+  document.getElementById('pauseOverlay').classList.remove('show');
+  document.getElementById('quizArea').style.display = 'none';
+  document.getElementById('resultScreen').classList.remove('show');
+  document.getElementById('startScreen').style.display = 'block';
+  cancelExit();
+  document.getElementById('pauseOverlay').classList.remove('show');
+  const te = document.getElementById('simTimer');
+  if(te) te.textContent = '⏱ 00:00';
+}
+
+const typeClsMap = {
+  'Phishing':'t-phishing','Malware':'t-malware','Ransomware':'t-ransomware',
+  'Social Engineering':'t-social','Password & Akun':'t-password','Man-in-the-Middle':'t-mitm'
+};
+
+function loadQ(){
+  const q = activeQuestions[qIdx];
+  document.getElementById('qNum').textContent = `Skenario ${qIdx+1} dari ${QUESTIONS_PER_SESSION}`;
+  document.getElementById('qBar').style.width = `${((qIdx+1)/QUESTIONS_PER_SESSION)*100}%`;
+  const typeEl = document.getElementById('qType');
+  typeEl.textContent = q.type;
+  typeEl.className = 'q-type ' + (typeClsMap[q.type] || '');
+  document.getElementById('qBody').textContent = q.body;
+  const vis = document.getElementById('qVisual');
+  if(q.visual){ vis.innerHTML = q.visual; vis.style.display='block'; } else { vis.style.display='none'; }
+  document.getElementById('scoreVal').textContent = score;
+  const box = document.getElementById('choicesBox');
+  box.innerHTML = '';
+  shuffle(q.choices).forEach((c,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-letter">${'ABCD'[i]}</span>${c.t}`;
+    btn.onclick = ()=>answer(c.c, btn, q);
+    box.appendChild(btn);
+  });
+  document.getElementById('feedbackBox').className = 'feedback';
+  document.getElementById('nextBtn').style.display = 'none';
+  answered = false;
+}
+
+function answer(correct, btn, q){
+  if(answered || isPaused) return;
+  answered = true;
+  log.push({type:q.type, ok:correct});
+  document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+  if(correct){
+    btn.classList.add('correct');
+    score++;
+    document.getElementById('scoreVal').textContent = score;
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.choice-btn').forEach(b=>{
+      if(q.choices.find(c=>c.c && b.innerHTML.includes(c.t))) b.classList.add('correct');
+    });
+    const box = document.getElementById('simBox');
+    if(box){ box.classList.add('hacked'); setTimeout(()=>box.classList.remove('hacked'),500); }
+  }
+  const fb = document.getElementById('feedbackBox');
+  fb.className = `feedback ${correct?'ok':'bad'} show`;
+  document.getElementById('fbTitle').textContent = correct ? '✓ Keputusan Tepat!' : '✗ Kurang Tepat';
+  document.getElementById('fbDesc').textContent = correct ? q.ok : q.bad;
+  document.getElementById('nextBtn').style.display = 'inline-block';
+  document.getElementById('nextBtn').textContent = qIdx === QUESTIONS_PER_SESSION-1 ? 'Lihat Hasil →' : 'Skenario Berikutnya →';
+}
+
+function nextQ(){
+  qIdx++;
+  if(qIdx >= QUESTIONS_PER_SESSION) showResult();
+  else loadQ();
+}
+
+function showResult(){
+  clearInterval(timerInt);
+  const elapsed = getElapsed();
+  document.getElementById('quizArea').style.display = 'none';
+  const rs = document.getElementById('resultScreen');
+  rs.classList.add('show');
+  window.scrollTo({top: document.getElementById('simBox').offsetTop - 80, behavior:'smooth'});
+
+  const d = CS.get();
+  d.totalSessions = (d.totalSessions||0)+1;
+  if(!d.bestScore || score > d.bestScore.score) d.bestScore = {score, total:QUESTIONS_PER_SESSION};
+  CS.set(d);
+
+  const pct = Math.round((score/QUESTIONS_PER_SESSION)*100);
+  const badge = getBadge(pct);
+  const descs = {
+    100:'Sempurna! Tidak satu pun ancaman berhasil mengelabui kamu. Kamu adalah tameng digital sejati!',
+    80:'Luar biasa! Instingmu dalam mengenali ancaman siber sangat tajam. Terus asah kemampuanmu!',
+    60:'Cukup baik, tapi masih ada celah. Perkuat pemahaman dengan membaca materi edukasi.',
+    0:'Masih banyak yang perlu dipelajari. Baca materi edukasi dan coba lagi untuk meningkatkan pertahananmu.'
+  };
+  const dk = pct===100?100:pct>=80?80:pct>=60?60:0;
+
+  document.getElementById('rIcon').textContent = badge.emoji;
+  document.getElementById('rTitle').textContent = badge.title;
+  document.getElementById('rScore').textContent = `${score}/${QUESTIONS_PER_SESSION}`;
+  document.getElementById('rPct').textContent = `${pct}% Benar`;
+  document.getElementById('rTime').textContent = `⏱ Waktu: ${fmtTime(elapsed)}`;
+  document.getElementById('rDesc').textContent = descs[dk];
+
+  const byType = {};
+  log.forEach(l=>{
+    if(!byType[l.type]) byType[l.type]={ok:0,total:0};
+    byType[l.type].total++;
+    if(l.ok) byType[l.type].ok++;
+  });
+  document.getElementById('rBreakdown').innerHTML = `
+    <div style="margin:16px 0 10px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;width:100%;text-align:center">Hasil per Kategori</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+      ${Object.entries(byType).map(([type,{ok,total}])=>`
+        <div style="background:${ok===total?'rgba(16,185,129,.07)':'rgba(239,68,68,.07)'};border:1px solid ${ok===total?'rgba(16,185,129,.25)':'rgba(239,68,68,.25)'};border-radius:10px;padding:10px 16px;min-width:130px;text-align:center">
+          <div style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:${ok===total?'#34d399':'#f87171'};margin-bottom:4px;letter-spacing:.5px">${ok===total?'✓':'✗'} ${type}</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:${ok===total?'#34d399':'#f87171'}">${ok}/${total}</div>
+        </div>`).join('')}
+    </div>`;
+
+  const certBox = document.getElementById('certBox');
+  if(certBox){
+    certBox.style.display = 'block';
+    certBox.innerHTML = `
+      <div style="background:${badge.bg};border:1.5px solid ${badge.border};border-radius:16px;padding:28px;max-width:480px;margin:0 auto;text-align:center">
+        <div style="font-size:44px;margin-bottom:10px">${badge.emoji}</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:800;color:${badge.color};margin-bottom:4px">${badge.title}</div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">CyberShield · ${new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</div>
+        <div style="font-size:15px;color:var(--text2);margin-bottom:18px">Skor: <strong style="color:${badge.color};font-size:22px">${score}/${QUESTIONS_PER_SESSION}</strong> &nbsp;·&nbsp; ${fmtTime(elapsed)}</div>
+        <div style="display:flex;gap:8px;max-width:340px;margin:0 auto">
+          <input id="lbNameInput" type="text" placeholder="Masukkan namamu..."  maxlength="20"
+            style="flex:1;padding:10px 12px;border:1px solid ${badge.border};border-radius:8px;font-size:13px;font-family:'Outfit',sans-serif;outline:none;background:var(--surface);color:var(--text)">
+          <button onclick="submitToLB(${score},${QUESTIONS_PER_SESSION},${elapsed})"
+            style="padding:10px 18px;background:${badge.color};color:#040d1a;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;transition:all .2s">
+            Simpan →
+          </button>
+        </div>
+        <div id="lbSavedMsg" style="display:none;margin-top:10px;font-family:'Space Mono',monospace;font-size:11px;color:${badge.color};letter-spacing:.5px">✓ SKOR TERSIMPAN</div>
+      </div>`;
+  }
+}
+
+function restartQuiz(){
+  clearInterval(timerInt);
+  isPaused = false;
+  document.getElementById('resultScreen').classList.remove('show');
+  const certBox = document.getElementById('certBox');
+  if(certBox) certBox.style.display = 'none';
+  document.getElementById('startScreen').style.display = 'block';
+  document.getElementById('quizArea').style.display = 'none';
+  const te = document.getElementById('simTimer');
+  if(te) te.textContent = '⏱ 00:00';
+}
+
+function buildLeaderboard(){
+  const lb = document.getElementById('leaderboardBox');
+  if(!lb) return;
+  const d = CS.get();
+  const scores = d.scores || [];
+  if(scores.length === 0){
+    lb.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text3);font-family:'Space Mono',monospace;font-size:12px">// Belum ada skor tersimpan.<br>// Selesaikan simulasi untuk masuk.</div>`;
+    return;
+  }
+  const sorted = [...scores].sort((a,b)=> b.score===a.score ? a.time-b.time : b.score-a.score);
+  lb.innerHTML = sorted.slice(0,10).map((s,i)=>{
+    const pct = Math.round((s.score/s.total)*100);
+    const b = getBadge(pct);
+    const medals = ['🥇','🥈','🥉'];
+    return `<div class="lb-row ${i===0?'lb-top':''}">
+      <div class="lb-rank">${medals[i]||('#'+(i+1))}</div>
+      <div class="lb-info"><div class="lb-name">${s.name||'Anonymous'}</div><div class="lb-meta">${s.date} · ${fmtTime(s.time*1000)}</div></div>
+      <div class="lb-badge" style="color:${b.color}">${b.emoji} ${b.title}</div>
+      <div class="lb-score" style="color:${b.color}">${s.score}/${s.total}</div>
+    </div>`;
+  }).join('');
+}
+
+function submitToLB(score, total, elapsed){
+  const nameEl = document.getElementById('lbNameInput');
+  const name = nameEl ? nameEl.value.trim() : 'Anonymous';
+  const d = CS.get();
+  if(!d.scores) d.scores = [];
+  d.scores.push({ name:name.slice(0,20)||'Anonymous', score, total, time:Math.round(elapsed/1000), date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short'}) });
+  d.scores.sort((a,b)=> b.score===a.score ? a.time-b.time : b.score-a.score);
+  d.scores = d.scores.slice(0,20);
+  CS.set(d);
+  const msg = document.getElementById('lbSavedMsg');
+  if(msg) msg.style.display='block';
+  if(nameEl) nameEl.disabled=true;
+  const btn = nameEl?.nextElementSibling;
+  if(btn){ btn.disabled=true; btn.style.opacity='0.5'; }
+  buildLeaderboard();
+}
+
+function clearLB(){
+  if(!confirm('Reset semua skor leaderboard?')) return;
+  const d = CS.get(); d.scores = []; CS.set(d);
+  buildLeaderboard();
+}
+
+buildLeaderboard();
+</script>
+</body>
+</html>
