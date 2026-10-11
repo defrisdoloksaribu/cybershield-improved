@@ -5,7 +5,7 @@
 
 Website ini menyediakan materi edukasi, tips keamanan, informasi tools, serta simulasi sederhana yang dapat digunakan sebagai media pembelajaran dasar mengenai cybersecurity.
 
----
+ 
 
 
 
@@ -23,7 +23,7 @@ Melalui website ini, pengguna dapat mempelajari beberapa hal seperti:
 - 🧰 Mengenal beberapa tools yang berkaitan dengan cybersecurity
 - 🎯 Mencoba simulasi sederhana mengenai keamanan siber
 
----
+ 
 
 ## ✨ Fitur Website
 
@@ -51,7 +51,7 @@ Menyediakan simulasi sederhana sebagai media pembelajaran agar pengguna dapat me
 
 Berisi informasi mengenai project CyberShield dan tujuan pembuatannya.
 
----
+ 
 
 ## 🛠️ Teknologi yang Digunakan
 
@@ -63,11 +63,11 @@ Project ini dibuat menggunakan teknologi web dasar:
 | CSS3 | Tampilan, layout, dan styling |
 | JavaScript | Interaksi dan fungsi website |
 
----
+ 
 
 ## 📂 Struktur Project
 
-```text
+ 
 cybershield_improved/
 │
 ├── index.html
